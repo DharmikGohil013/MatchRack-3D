@@ -1,0 +1,8 @@
+# Unity project-specific ignores
+/Library/
+/Temp/
+/Logs/
+/obj/
+/Builds/
+/UserSettings/
+*.log
