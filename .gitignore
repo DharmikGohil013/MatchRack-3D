@@ -10,7 +10,8 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
-/lib/
+/Library/
+/Temp/
 /libs/
 *.log
 
