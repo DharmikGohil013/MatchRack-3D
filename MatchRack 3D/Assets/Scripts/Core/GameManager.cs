@@ -150,7 +150,9 @@ namespace MatchItems
                     _lastUndoRecord = null;
                     SetUndoAvailable(false);
                     _levelManager.LoadLevel(_levelManager.CurrentLevelIndex);
-                    break;
+                    // LoadLevel triggers ChangeState(Playing) synchronously.
+                    // Return early to avoid firing the Loading event AFTER Playing.
+                    return;
 
                 case GameState.Playing:
                     // Initialise the timer from level data

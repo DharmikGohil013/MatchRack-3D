@@ -3,6 +3,7 @@
 // when a valid item is tapped. Works with both mouse (Editor) and touch (mobile).
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace MatchItems
 {
@@ -58,6 +59,7 @@ namespace MatchItems
             // Detect input
             if (HasTapInput(out Vector3 screenPosition))
             {
+                Debug.Log($"[InputHandler] Tap detected at {screenPosition}");
                 TryRaycastItem(screenPosition);
             }
         }
@@ -68,28 +70,24 @@ namespace MatchItems
 
         /// <summary>
         /// Returns true if the player tapped/clicked this frame and outputs the screen position.
-        /// Supports both mouse (Editor/standalone) and single-touch (mobile).
+        /// Uses the new Input System package (UnityEngine.InputSystem).
         /// </summary>
         private bool HasTapInput(out Vector3 screenPosition)
         {
             screenPosition = Vector3.zero;
 
-            // Mouse input (works in Editor and standalone)
-            if (Input.GetMouseButtonDown(0))
+            // Mouse input
+            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
             {
-                screenPosition = Input.mousePosition;
+                screenPosition = Mouse.current.position.ReadValue();
                 return true;
             }
 
             // Touch input (mobile)
-            if (Input.touchCount > 0)
+            if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
             {
-                Touch touch = Input.GetTouch(0);
-                if (touch.phase == TouchPhase.Began)
-                {
-                    screenPosition = touch.position;
-                    return true;
-                }
+                screenPosition = Touchscreen.current.primaryTouch.position.ReadValue();
+                return true;
             }
 
             return false;
@@ -112,6 +110,8 @@ namespace MatchItems
 
             if (Physics.Raycast(ray, out RaycastHit hit, _raycastDistance, _itemLayerMask))
             {
+                Debug.Log($"[InputHandler] Raycast hit: {hit.collider.gameObject.name} on layer {hit.collider.gameObject.layer}");
+
                 // Check if the hit object (or its parent) has an ItemBehaviour
                 ItemBehaviour item = hit.collider.GetComponentInParent<ItemBehaviour>();
 
@@ -123,6 +123,10 @@ namespace MatchItems
                         GameManager.Instance.OnItemTapped(item);
                     }
                 }
+            }
+            else
+            {
+                Debug.Log($"[InputHandler] Raycast missed. Layer mask: {_itemLayerMask.value}");
             }
         }
     }
