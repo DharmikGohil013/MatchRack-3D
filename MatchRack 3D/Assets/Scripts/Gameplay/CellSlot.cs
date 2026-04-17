@@ -202,6 +202,33 @@ namespace MatchItems
             }
 
             GameObject go = Instantiate(prefab, transform.position, Quaternion.identity, transform);
+
+            // Ensure the item has a working collider for raycast detection.
+            // MeshColliders on prefabs may have null mesh references, so add a
+            // BoxCollider fitted to the renderer bounds as a reliable fallback.
+            Collider existingCollider = go.GetComponentInChildren<Collider>();
+            bool needsCollider = existingCollider == null;
+            if (!needsCollider && existingCollider is MeshCollider mc && mc.sharedMesh == null)
+            {
+                needsCollider = true;
+                Destroy(existingCollider);
+            }
+            if (needsCollider)
+            {
+                Renderer rend = go.GetComponentInChildren<Renderer>();
+                if (rend != null)
+                {
+                    BoxCollider box = rend.gameObject.AddComponent<BoxCollider>();
+                    // Fit the box to the renderer's local bounds
+                    box.center = rend.localBounds.center;
+                    box.size = rend.localBounds.size;
+                }
+                else
+                {
+                    go.AddComponent<BoxCollider>();
+                }
+            }
+
             ItemBehaviour item = go.GetComponent<ItemBehaviour>();
             if (item == null)
             {
